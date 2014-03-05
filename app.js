@@ -129,6 +129,13 @@ App.prototype.calculate_computers_move = function() {
 				}
 			}
 
+			// Play the middle and corner tiles first
+			var preferred_tiles = [5, 1, 3, 7, 9];
+			for (var i=0;i<preferred_tiles.length;i++) {
+				if (self.played_tiles.indexOf(preferred_tiles[i]) == -1) {
+					return self.play_computers_move(preferred_tiles[i]);
+				}
+			}
 
 			// Otherwise, just play a random tile
 			while (self.played_tiles.length < 9) {
