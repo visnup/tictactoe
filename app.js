@@ -7,7 +7,18 @@ App.prototype.initialise = function() {
 	this.computers_tiles = [];
 	this.played_tiles = []; // player_tiles + computer_tiles
 	this.players_turn = false; // Set to true each time it is the players turn
-	this.update_notice("A few questions before we get started...")
+	this.winning_outcomes = [
+		[1,2,3],
+		[1,4,7],
+		[1,5,9],
+		[2,5,8],
+		[3,6,9],
+		[4,5,6],
+		[7,8,9],
+		[3,5,7]
+	];
+
+	this.update_notice("A few questions before we get started...");
 	this.questions.show();
 }
 
@@ -61,56 +72,114 @@ App.prototype.players_move = function(tile) {
 			if (this.played_tiles.length == 9) {
 				this.draw();
 			} else {
-				this.computers_move();
+				this.calculate_computers_move();
 			}
 		}
 	}
 }
 
-App.prototype.computers_move = function() {
+App.prototype.calculate_computers_move = function() {
 	this.update_notice("It's the computers turn");
 	var self = this;
 
-	setTimeout(function() { // A little delay while the computer 'thinks'
-		while (self.played_tiles.length < 9) {
-			var tile = Math.floor(Math.random()*9+1); // A random number from 1 to 9
-			if (self.played_tiles.indexOf(tile) == -1) {
-				// the tile hasn't been played
-		  	$('a[data-tile="' + tile + '"').addClass('computer');
-				self.computers_tiles.push(parseInt(tile));
-				self.played_tiles.push(parseInt(tile));
-				if (self.check_for_winner()) {
-					self.lost();
-				} else {
-					if (self.played_tiles.length == 9) {
-						self.draw();
+	if (this.level == "hard") {
+		setTimeout(function() { // A little delay while the computer 'thinks'
+
+			// First, check if the computer can win
+			for (var i=0;i<self.winning_outcomes.length;i++) {
+				var played = [];
+				var not_played = [];
+				for (var j=0; j<self.winning_outcomes[i].length;j++) {
+					var tile = self.winning_outcomes[i][j];
+					// played contains tiles computer has played
+					if (self.computers_tiles.indexOf(tile) != -1) {
+						played.push(tile);
 					} else {
-						self.waiting_for_players_move(tile);
+						not_played.push(tile);
 					}
 				}
-				return;
+				if (played.length == 2) {
+					// Can the tile in not_played be played?
+					var tile = not_played[0];
+					if (self.played_tiles.indexOf(tile) == -1)  {
+						return self.play_computers_move(tile);
+					}
+				}
 			}
-		}
 
-	}, 1000)
+			// Then, block an opponents winning move if there is one
+			for (var i=0;i<self.winning_outcomes.length;i++) {
+				var played = [];
+				var not_played = [];
+				for (var j=0; j<self.winning_outcomes[i].length;j++) {
+					var tile = self.winning_outcomes[i][j];
+					// played contains tiles the player has played
+					if (self.players_tiles.indexOf(tile) != -1) {
+						played.push(tile);
+					} else {
+						not_played.push(tile);
+					}
+				}
+				if (played.length == 2) {
+					// Can the tile in not_played be played?
+					var tile = not_played[0];
+					if (self.played_tiles.indexOf(tile) == -1)  {
+						return self.play_computers_move(tile);
+					}
+				}
+			}
+
+
+			// Otherwise, just play a random tile
+			while (self.played_tiles.length < 9) {
+				var tile = Math.floor(Math.random()*9+1); // A random number from 1 to 9
+				if (self.played_tiles.indexOf(tile) == -1) {
+					return self.play_computers_move(tile);
+				}
+			}
+		}, 1000);
+
+
+	} else {
+		// Easy - just pick a random tile
+		setTimeout(function() { // A little delay while the computer 'thinks'
+			while (self.played_tiles.length < 9) {
+				var tile = Math.floor(Math.random()*9+1); // A random number from 1 to 9
+				if (self.played_tiles.indexOf(tile) == -1) {
+					return self.play_computers_move(tile);
+				}
+			}
+		}, 1000);
+	}
 
 }
+
+App.prototype.play_computers_move = function(tile) {
+	// Play the tile
+	$('a[data-tile="' + tile + '"').addClass('computer');
+	this.computers_tiles.push(parseInt(tile));
+	this.played_tiles.push(parseInt(tile));
+
+	// Check for winner or draw
+	if (this.check_for_winner()) {
+		this.lost();
+	} else {
+		if (this.played_tiles.length == 9) {
+			this.draw();
+		} else {
+			this.waiting_for_players_move(tile);
+		}
+	}
+
+}
+
 
 
 App.prototype.check_for_winner = function() {
 	/* This function checks if there's a winner
 	   Returns true if a winner exists
 	   Returns false if there is no winner */
-	var winning_outcomes = [
-		[1,2,3],
-		[1,4,7],
-		[1,5,9],
-		[2,5,8],
-		[3,6,9],
-		[4,5,6],
-		[7,8,9],
-		[3,5,7]
-	];
+
 
 	if (this.players_turn == true) {
 		var array_to_check = this.players_tiles;
@@ -118,8 +187,8 @@ App.prototype.check_for_winner = function() {
 		var array_to_check = this.computers_tiles;
 	}
 
-	for (var i=0;i<winning_outcomes.length;i++) {
-		if ((array_to_check.indexOf(winning_outcomes[i][0]) > -1) && (array_to_check.indexOf(winning_outcomes[i][1]) > -1) && (array_to_check.indexOf(winning_outcomes[i][2]) > -1)) {
+	for (var i=0;i<this.winning_outcomes.length;i++) {
+		if ((array_to_check.indexOf(this.winning_outcomes[i][0]) > -1) && (array_to_check.indexOf(this.winning_outcomes[i][1]) > -1) && (array_to_check.indexOf(this.winning_outcomes[i][2]) > -1)) {
 			// There is a winner
 			return true;
 		}
