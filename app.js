@@ -19,7 +19,9 @@ App.prototype.initialise = function() {
 	];
 
 	this.update_notice("A few questions before we get started...");
-	this.questions.show();
+	this.questions.fadeIn();
+
+	return this;
 }
 
 App.prototype.submit_questions = function(name, level) {
@@ -87,63 +89,45 @@ App.prototype.calculate_computers_move = function() {
 
 			// First, check if the computer can win
 			for (var i=0;i<self.winning_outcomes.length;i++) {
-				var played = [];
 				var not_played = [];
 				for (var j=0; j<self.winning_outcomes[i].length;j++) {
 					var tile = self.winning_outcomes[i][j];
-					// played contains tiles computer has played
-					if (self.computers_tiles.indexOf(tile) != -1) {
-						played.push(tile);
-					} else {
+					if (self.computers_tiles.indexOf(tile) == -1) {
 						not_played.push(tile);
 					}
 				}
-				if (played.length == 2) {
-					// Can the tile in not_played be played?
-					var tile = not_played[0];
-					if (self.played_tiles.indexOf(tile) == -1)  {
-						return self.play_computers_move(tile);
+				if (not_played.length == 1) {
+					// Can the tile be played?
+					if (self.played_tiles.indexOf(not_played[0]) == -1)  {
+						return self.play_computers_move(not_played[0]);
 					}
 				}
 			}
 
 			// Then, block an opponents winning move if there is one
 			for (var i=0;i<self.winning_outcomes.length;i++) {
-				var played = [];
 				var not_played = [];
 				for (var j=0; j<self.winning_outcomes[i].length;j++) {
 					var tile = self.winning_outcomes[i][j];
-					// played contains tiles the player has played
-					if (self.players_tiles.indexOf(tile) != -1) {
-						played.push(tile);
-					} else {
+					if (self.players_tiles.indexOf(tile) == -1) {
 						not_played.push(tile);
 					}
 				}
-				if (played.length == 2) {
-					// Can the tile in not_played be played?
-					var tile = not_played[0];
-					if (self.played_tiles.indexOf(tile) == -1)  {
-						return self.play_computers_move(tile);
+				if (not_played.length == 1) {
+					if (self.played_tiles.indexOf(not_played[0]) == -1)  {
+						return self.play_computers_move(not_played[0]);
 					}
 				}
 			}
 
-			// Play the middle and corner tiles first
-			var preferred_tiles = [5, 1, 3, 7, 9];
+			// Otherwise, play tiles according to this priority
+			var preferred_tiles = [5, 1, 3, 7, 9, 2, 4, 6, 8];
 			for (var i=0;i<preferred_tiles.length;i++) {
 				if (self.played_tiles.indexOf(preferred_tiles[i]) == -1) {
 					return self.play_computers_move(preferred_tiles[i]);
 				}
 			}
 
-			// Otherwise, just play a random tile
-			while (self.played_tiles.length < 9) {
-				var tile = Math.floor(Math.random()*9+1); // A random number from 1 to 9
-				if (self.played_tiles.indexOf(tile) == -1) {
-					return self.play_computers_move(tile);
-				}
-			}
 		}, 1000);
 
 
@@ -177,9 +161,7 @@ App.prototype.play_computers_move = function(tile) {
 			this.waiting_for_players_move(tile);
 		}
 	}
-
 }
-
 
 
 App.prototype.check_for_winner = function() {
@@ -236,9 +218,9 @@ App.prototype.update_notice = function(notice) {
 
 
 $(document).ready(function() {
-  window.tictactoe = new App();
-  tictactoe.initialise();
-  $('body').fadeIn();
+	window.tictactoe = new App();
+	tictactoe.initialise();
+	$('body').fadeIn();
 
   // Event handlers
 	$('#form_qns').submit( function(evt) {
