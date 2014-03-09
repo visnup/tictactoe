@@ -67,14 +67,14 @@ App.prototype.players_move = function(tile) {
 		this.players_tiles.push(tile);
 		this.played_tiles.push(tile);
 		if (this.check_for_winner()) {
-			this.won()
 			this.players_turn = false; // Don't let player move
+			return this.won()
 		} else {
 			this.players_turn = false; // Don't let player move
 			if (this.played_tiles.length == 9) {
-				this.draw();
+				return this.draw();
 			} else {
-				this.calculate_computers_move();
+				return this.calculate_computers_move();
 			}
 		}
 	}
@@ -83,11 +83,10 @@ App.prototype.players_move = function(tile) {
 App.prototype.calculate_computers_move = function() {
 	this.update_notice("It's the computers turn");
 	var self = this;
-
 	if (this.level == "hard") {
 		setTimeout(function() { // A little delay while the computer 'thinks'
-
 			// First, check if the computer can win
+
 			for (var i=0;i<self.winning_outcomes.length;i++) {
 				var not_played = [];
 				for (var j=0; j<self.winning_outcomes[i].length;j++) {
@@ -121,10 +120,11 @@ App.prototype.calculate_computers_move = function() {
 			}
 
 			// Otherwise, play tiles according to this priority
+
 			var preferred_tiles = [5, 1, 3, 7, 9, 2, 4, 6, 8];
 			for (var i=0;i<preferred_tiles.length;i++) {
 				if (self.played_tiles.indexOf(preferred_tiles[i]) == -1) {
-					return self.play_computers_move(preferred_tiles[i]);
+					 return self.play_computers_move(preferred_tiles[i]);
 				}
 			}
 
@@ -153,12 +153,12 @@ App.prototype.play_computers_move = function(tile) {
 
 	// Check for winner or draw
 	if (this.check_for_winner()) {
-		this.lost();
+		return this.lost();
 	} else {
 		if (this.played_tiles.length == 9) {
-			this.draw();
+			return this.draw();
 		} else {
-			this.waiting_for_players_move(tile);
+			return this.waiting_for_players_move(tile);
 		}
 	}
 }
@@ -188,7 +188,7 @@ App.prototype.check_for_winner = function() {
 
 /* Outcomes */
 
-App.prototype.won = function(elem) {
+App.prototype.won = function() {
 	this.update_notice("You legend!!!");
 	$('#game_info').fadeOut(400, function() {
 		$('#won').fadeIn();
