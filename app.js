@@ -147,7 +147,7 @@ App.prototype.calculate_computers_move = function() {
 
 App.prototype.play_computers_move = function(tile) {
 	// Play the tile
-	$('a[data-tile="' + tile + '"').addClass('computer');
+	$('a[data-tile="' + tile + '"]').addClass('computer');
 	this.computers_tiles.push(parseInt(tile));
 	this.played_tiles.push(parseInt(tile));
 
