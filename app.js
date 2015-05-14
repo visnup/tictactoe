@@ -63,7 +63,7 @@ App.prototype.waiting_for_players_move = function(tile) {
 App.prototype.players_move = function(tile) {
 	if (this.players_turn == true && this.played_tiles.indexOf(tile) == -1) {
 		// It is a valid play
-	  $('a[data-tile="' + tile + '"').addClass('player');
+	  $('a[data-tile="' + tile + '"]').addClass('player');
 		this.players_tiles.push(tile);
 		this.played_tiles.push(tile);
 		if (this.check_for_winner()) {
